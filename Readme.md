@@ -76,3 +76,31 @@ npm test
 ```sh
 yarn test
 ```
+
+##
+
+[npm]: https://www.npmjs.com/
+
+[yarn]: https://yarnpkg.com/
+
+[node]: https://nodejs.org
+
+[unix]: https://en.wikipedia.org/wiki/Unix_philosophy
+
+[nvm]: https://github.com/creationix/nvm
+
+[mongodb]: https://www.mongodb.com/
+
+[github-git]: https://help.github.com/articles/set-up-git/
+
+[git]: https://git-scm.com/
+
+[brew]: https://brew.sh/
+
+[koa-better-error-handler]: https://github.com/niftylettuce/koa-better-error-handler
+
+[mocha]: https://mochajs.org/
+
+[should]: https://shouldjs.github.io/
+
+[supertest]: https://github.com/visionmedia/supertest
