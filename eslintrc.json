@@ -1,0 +1,16 @@
+{
+  "env": "mocha",
+  "extends": ["standard"],
+  "plugins": ["standard", "promise"],
+  "rules": {
+    "comma-dangle": [2, "always-multiline"],
+    "space-before-function-paren": [2, "never"],
+    "arrow-parens": 0,
+    "eqeqeq": 0,
+    "no-return-assign": 0,
+    "semi": [2, "always"],
+    "space-before-function-paren": [2, "never"],
+    "arrow-spacing": 2,
+    "dot-location": [2, "property"]
+  }
+}
