@@ -3,10 +3,12 @@ const logger = require('koa-logger')
 const router = require('koa-router')()
 const bodyParser = require('koa-bodyparser')
 const koa404Handler = require('koa-404-handler')
+const json = require('koa-json')
 const compress = require('koa-compress')
 const responseTime = require('koa-response-time')
 const removeTrailingSlashes = require('koa-no-trailing-slash')
 const helmet = require('koa-helmet')
+const Timeout = require('koa-better-timeout')
 
 const Koa = require('koa')
 const app = (module.exports = new Koa())
@@ -32,11 +34,30 @@ app.use(removeTrailingSlashes())
 // body parser
 app.use(bodyParser())
 
+// pretty-printed json responses
+app.use(json())
+
 // compress/gzip
 app.use(compress())
 
 // response time
 app.use(responseTime())
+
+// configure timeout
+app.use(async (ctx, next) => {
+  try {
+    const timeout = new Timeout({
+      ms: 3000,
+      message: 'REQUEST_TIMED_OUT',
+    })
+    await timeout.middleware(ctx, next)
+  } catch (err) {
+    ctx.throw(err)
+  }
+})
+
+// 404 handler
+app.use(koa404Handler)
 
 // route definitions
 
@@ -44,6 +65,8 @@ router
   .get('/', list)
   .get('/post/new', add)
   .get('/post/:id', show)
+  .get('/post/:id/json', showJson)
+  .get('/json', listJson)
   .post('/post', create)
 
 app.use(router.routes())
@@ -54,6 +77,12 @@ app.use(router.routes())
 
 async function list(ctx) {
   await ctx.render('list', { posts: posts })
+}
+
+async function listJson(ctx) {
+  ctx.body = {
+    posts,
+  }
 }
 
 /**
@@ -73,6 +102,13 @@ async function show(ctx) {
   const post = posts[id]
   if (!post) ctx.throw(404, 'invalid post id')
   await ctx.render('show', { post: post })
+}
+
+async function showJson(ctx) {
+  const id = ctx.params.id
+  const post = posts[id]
+  if (!post) ctx.throw(404, 'invalid post id')
+  return (ctx.body = post)
 }
 
 /**
