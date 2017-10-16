@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-expressions */
+
 const app = require('../app')
 const request = require('supertest').agent(app.listen())
 require('should')

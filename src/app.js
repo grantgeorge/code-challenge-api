@@ -1,38 +1,59 @@
+const config = require('config')
+const http = require('http')
 const render = require('./lib/render')
 const logger = require('koa-logger')
-const router = require('koa-router')()
+const camelizeMiddleware = require('middleware/camelize-middleware')
 const bodyParser = require('koa-bodyparser')
 const koa404Handler = require('koa-404-handler')
 const json = require('koa-json')
+const errorHandler = require('koa-better-error-handler')
 const compress = require('koa-compress')
 const responseTime = require('koa-response-time')
 const removeTrailingSlashes = require('koa-no-trailing-slash')
+const conditional = require('koa-conditional-get')
+const cors = require('kcors')
+const jwt = require('middleware/jwt-middleware')
+const etag = require('koa-etag')
 const helmet = require('koa-helmet')
 const Timeout = require('koa-better-timeout')
+const routes = require('routes')
 
 const Koa = require('koa')
-const app = (module.exports = new Koa())
+const app = new Koa()
 
-let port = process.env.NODE_ENV === 'development' ? 1337 : 9000
-
-// "database"
-
-const posts = []
+app.keys = [config.secret]
 
 // middleware
 
+if (!config.env.isTest) {
+  app.use(responseTime())
+  app.use(helmet())
+}
+
 app.use(logger())
 
-app.use(render)
+// Camelize keys
+app.use(camelizeMiddleware)
 
-// security
-app.use(helmet())
+// conditional-get
+app.use(conditional())
+
+// etag
+app.use(etag())
+
+// cors
+app.use(cors(config.cors))
+
+// JWT Middleware
+app.use(jwt)
+
+app.use(render)
 
 // remove trailing slashes
 app.use(removeTrailingSlashes())
 
 // body parser
-app.use(bodyParser())
+app.use(bodyParser(config.bodyParser))
 
 // pretty-printed json responses
 app.use(json())
@@ -40,11 +61,11 @@ app.use(json())
 // compress/gzip
 app.use(compress())
 
-// response time
-app.use(responseTime())
+// override koa's undocumented error handler
+app.context.onerror = errorHandler
 
 // configure timeout
-app.use(async (ctx, next) => {
+app.use(async(ctx, next) => {
   try {
     const timeout = new Timeout({
       ms: 3000,
@@ -56,78 +77,35 @@ app.use(async (ctx, next) => {
   }
 })
 
+app.use(routes.routes())
+app.use(routes.allowedMethods())
+
+app.server = require('http-shutdown')(http.createServer(app.callback()))
+
 // 404 handler
 app.use(koa404Handler)
 
-// route definitions
+app.shutDown = function shutDown() {
+  let err
 
-router
-  .get('/', list)
-  .get('/post/new', add)
-  .get('/post/:id', show)
-  .get('/post/:id/json', showJson)
-  .get('/json', listJson)
-  .post('/post', create)
+  console.log('Shutdown')
 
-app.use(router.routes())
+  if (this.server.listening) {
+    this.server.shutdown((error) => {
+      if (error) {
+        console.error(error)
+        err = error
+      }
 
-/**
- * Post listing.
- */
-
-async function list(ctx) {
-  await ctx.render('list', { posts: posts })
-}
-
-async function listJson(ctx) {
-  ctx.body = {
-    posts,
+      this.db
+        .destroy()
+        .catch((error) => {
+          console.error(error)
+          err = error
+        })
+        .then(() => process.exit(err ? 1 : 0))
+    })
   }
 }
 
-/**
- * Show creation form.
- */
-
-async function add(ctx) {
-  await ctx.render('new')
-}
-
-/**
- * Show post :id.
- */
-
-async function show(ctx) {
-  const id = ctx.params.id
-  const post = posts[id]
-  if (!post) ctx.throw(404, 'invalid post id')
-  await ctx.render('show', { post: post })
-}
-
-async function showJson(ctx) {
-  const id = ctx.params.id
-  const post = posts[id]
-  if (!post) ctx.throw(404, 'invalid post id')
-  return (ctx.body = post)
-}
-
-/**
- * Create a post.
- */
-
-async function create(ctx) {
-  const post = ctx.request.body
-  const id = posts.push(post) - 1
-  post.created_at = new Date()
-  post.id = id
-  ctx.redirect('/')
-}
-
-// listen
-
-console.log('is module parent')
-
-// if (!module.parent)
-app.listen(port, () => {
-  console.log(`app listening on port ${port}`)
-})
+module.exports = app

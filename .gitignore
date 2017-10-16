@@ -51,6 +51,8 @@ results
 
 node_modules
 npm-debug.log
+yarn-debug.log*
+yarn-error.log*
 
 # Components #
 ##############
@@ -74,3 +76,14 @@ test/images/originalSideways.jpg.2
 # Traceur output #
 ##################
 out/*
+
+# tmp
+data
+.env
+
+# IDEs and editors
+/.idea
+.project
+.classpath
+*.launch
+.settings/
