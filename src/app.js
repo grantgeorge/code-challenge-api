@@ -3,6 +3,7 @@ const http = require('http')
 const render = require('./lib/render')
 const logger = require('koa-logger')
 const camelizeMiddleware = require('middleware/camelize-middleware')
+// const error = require('middleware/error-middleware')
 const bodyParser = require('koa-bodyparser')
 const koa404Handler = require('koa-404-handler')
 const json = require('koa-json')
@@ -16,7 +17,8 @@ const jwt = require('middleware/jwt-middleware')
 const etag = require('koa-etag')
 const helmet = require('koa-helmet')
 const Timeout = require('koa-better-timeout')
-const routes = require('routes')
+
+const mongoose = require('mongoose')
 
 const Koa = require('koa')
 const app = new Koa()
@@ -35,6 +37,9 @@ app.use(logger())
 // Camelize keys
 app.use(camelizeMiddleware)
 
+// Error middleware
+// app.use(error)
+
 // conditional-get
 app.use(conditional())
 
@@ -44,13 +49,13 @@ app.use(etag())
 // cors
 app.use(cors(config.cors))
 
-// JWT Middleware
-app.use(jwt)
-
 app.use(render)
 
 // remove trailing slashes
 app.use(removeTrailingSlashes())
+
+// JWT Middleware
+app.use(jwt)
 
 // body parser
 app.use(bodyParser(config.bodyParser))
@@ -77,6 +82,28 @@ app.use(async(ctx, next) => {
   }
 })
 
+if (config.env.isProd) {
+  mongoose.connect(process.env.MONGODB_URI, {
+    useMongoClient: true,
+  })
+} else {
+  mongoose.connect('mongodb://localhost/sts-code-challenge', {
+    useMongoClient: true,
+  })
+  mongoose.set('debug', true)
+}
+
+require('./models/User')
+require('./models/Article')
+require('./models/Comment')
+require('./models/Post')
+require('./config/passport')
+
+// User Middleware
+app.use(require('middleware/user-middleware'))
+
+const routes = require('routes')
+
 app.use(routes.routes())
 app.use(routes.allowedMethods())
 
@@ -97,13 +124,13 @@ app.shutDown = function shutDown() {
         err = error
       }
 
-      this.db
-        .destroy()
-        .catch((error) => {
-          console.error(error)
-          err = error
-        })
-        .then(() => process.exit(err ? 1 : 0))
+      // this.db
+      //   .destroy()
+      //   .catch((error) => {
+      //     console.error(error)
+      //     err = error
+      //   })
+      //   .then(() => process.exit(err ? 1 : 0))
     })
   }
 }

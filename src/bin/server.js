@@ -34,5 +34,5 @@ function onError(error) {
 function onListening() {
   var addr = app.server.address()
   var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port
-  console.log(chalk.greenBright('🚀 Listening on ' + bind))
+  console.log(chalk.greenBright('[API] 🚀 Listening on ' + bind))
 }

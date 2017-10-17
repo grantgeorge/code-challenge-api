@@ -1,59 +1,26 @@
-// route definitions
 const Router = require('koa-router')
-// const ctrl = require('controllers').articles
+const ctrl = require('controllers').posts
 const router = new Router()
 
 const auth = require('middleware/auth-required-middleware')
 
-// "database"
+router.param('id', ctrl.byId)
+// router.param('comment', ctrl.comments.byComment)
 
-const posts = []
+router.get('/posts', ctrl.index)
+router.post('/posts', auth, ctrl.create)
 
-router
-  .get('/', list)
-  .get('/post/new', add)
-  .get('/post/:id', show)
-  .post('/post', create)
+router.get('/posts/feed', auth, ctrl.feed.get)
 
-/**
- * Post listing.
- */
+router.get('/posts/:id', ctrl.show)
+router.put('/posts/:id', auth, ctrl.update)
+router.del('/posts/:id', auth, ctrl.del)
 
-async function list(ctx) {
-  ctx.body = {
-    posts,
-  }
-}
+// router.post('/posts/:id/favorite', auth, ctrl.favorite.create)
+// router.del('/posts/:id/favorite', auth, ctrl.favorite.delete)
 
-/**
- * Show creation form.
- */
-
-async function add(ctx) {
-  await ctx.render('new')
-}
-
-/**
- * Show post :id.
- */
-
-async function show(ctx) {
-  const id = ctx.params.id
-  const post = posts[id]
-  if (!post) ctx.throw(404, 'invalid post id')
-  return (ctx.body = post)
-}
-
-/**
- * Create a post.
- */
-
-async function create(ctx) {
-  const post = ctx.request.body
-  const id = posts.push(post) - 1
-  post.created_at = new Date()
-  post.id = id
-  ctx.redirect('/')
-}
+// router.get('/posts/:id/comments', ctrl.comments.get)
+// router.post('/posts/:id/comments', auth, ctrl.comments.create)
+// router.del('/posts/:id/comments/:comment', auth, ctrl.comments.delete)
 
 module.exports = router.routes()
