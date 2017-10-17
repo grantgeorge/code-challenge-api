@@ -26,7 +26,7 @@ PostSchema.methods.updateFavoriteCount = function() {
 
 PostSchema.methods.toJSONFor = function(user) {
   return {
-    slug: this.slug,
+    id: this._id,
     body: this.body,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,

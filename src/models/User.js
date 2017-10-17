@@ -1,19 +1,15 @@
 const mongoose = require('mongoose')
-const uniqueValidator = require('mongoose-unique-validator')
+// const uniqueValidator = require('mongoose-unique-validator')
 const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
 const secret = require('../config').secret
+// const passportLocalMongoose = require('passport-local-mongoose')
+// const config = require('config')
 
 const UserSchema = new mongoose.Schema(
   {
-    username: {
-      type: String,
-      lowercase: true,
-      unique: true,
-      required: [true, "can't be blank"],
-      match: [/^[a-zA-Z0-9]+$/, 'is invalid'],
-      index: true,
-    },
+    hash: String,
+    salt: String,
     email: {
       type: String,
       lowercase: true,
@@ -26,16 +22,15 @@ const UserSchema = new mongoose.Schema(
     image: String,
     favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    hash: String,
-    salt: String,
   },
   { timestamps: true }
 )
 
-UserSchema.plugin(uniqueValidator, { message: 'is already taken.' })
+// UserSchema.plugin(uniqueValidator, { message: 'is already taken.' })
+// UserSchema.plugin(passportLocalMongoose, config.auth.strategies.local)
 
 UserSchema.methods.validPassword = function(password) {
-  const hash = crypto
+  var hash = crypto
     .pbkdf2Sync(password, this.salt, 10000, 512, 'sha512')
     .toString('hex')
   return this.hash === hash
@@ -116,9 +111,21 @@ UserSchema.methods.unfollow = function(id) {
 }
 
 UserSchema.methods.isFollowing = function(id) {
-  return this.following.some(function(followId) {
+  return this.following.some((followId) => {
     return followId.toString() === id.toString()
   })
 }
 
-mongoose.model('User', UserSchema)
+// https://github.com/saintedlama/passport-local-mongoose/issues/218
+UserSchema.statics.registerAsync = function(data, password) {
+  return new Promise((resolve, reject) => {
+    this.register(data, password, (err, user) => {
+      if (err) return reject(err)
+      resolve(user)
+    })
+  })
+}
+
+UserSchema.statics.findByEmail = UserSchema.statics.findByUsername
+
+module.exports = mongoose.model('User', UserSchema)

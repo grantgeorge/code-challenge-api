@@ -7,7 +7,6 @@
   "dependencies": {
     "bcrypt": "^1.0.3",
     "chalk": "^2.1.0",
-    "cross-env": "^5.1.0",
     "dotenv": "^4.0.0",
     "http-shutdown": "^1.2.0",
     "humps": "^2.0.1",
@@ -29,6 +28,7 @@
     "koa-jwt": "^3.2.2",
     "koa-logger": "^3.1.0",
     "koa-no-trailing-slash": "^2.1.0",
+    "koa-passport": "^4.0.1",
     "koa-response-time": "^2.0.0",
     "koa-router": "^7.2.1",
     "koa-views": "^6.1.1",
@@ -37,16 +37,19 @@
     "mongoose-unique-validator": "^1.0.6",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
-    "slug": "^0.9.1",
+    "passport-local-mongoose": "^4.2.1",
+    "strength": "^0.1.4",
     "supertest": "^3.0.0",
     "swig": "^1.4.2",
     "yup": "^0.23.0"
   },
   "devDependencies": {
+    "ava": "^0.22.0",
     "babel-plugin-transform-async-to-generator": "^6.24.1",
     "babel-plugin-transform-async-to-module-method": "^6.24.1",
     "babel-preset-env": "^1.6.0",
     "babel-register": "^6.26.0",
+    "cross-env": "^5.1.0",
     "eslint": "^4.9.0",
     "eslint-config-standard": "^10.2.1",
     "eslint-plugin-import": "^2.7.0",
@@ -56,12 +59,15 @@
     "faker": "^4.1.0",
     "mocha": "^4.0.1",
     "nodemon": "^1.12.1",
+    "nyc": "^11.2.1",
     "should": "^13.1.2"
   },
   "scripts": {
     "start": "cross-env NODE_PATH=src nodemon src/bin/server.js",
-    "test": "cross-env NODE_ENV=test make test",
-    "debug": "cross-env DEBUG=* NODE_ENV=development NODE_PATH=src nodemon src/index.js",
+    "test":
+      "cross-env NODE_PATH=src NODE_ENV=test ava --verbose src/test/**/*.js",
+    "debug":
+      "cross-env DEBUG=* NODE_ENV=development NODE_PATH=src nodemon src/bin/server.js",
     "lint": "cross-env eslint ./src/**/*.js"
   },
   "engines": {

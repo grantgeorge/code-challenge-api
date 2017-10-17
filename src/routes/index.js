@@ -2,20 +2,13 @@ const Router = require('koa-router')
 const router = new Router()
 const api = new Router()
 
-// const posts = require('./posts-router')
-// api.use(posts)
-
 const users = require('./users-router')
 const posts = require('./posts-router')
-// const articles = require('./articles-router')
-// const profiles = require('./profiles-router')
-// const tags = require('./tags-router')
+const profiles = require('./profiles-router')
 
 api.use(users)
 api.use(posts)
-// api.use(articles)
-// api.use(profiles)
-// api.use(tags)
+api.use(profiles)
 
 router.use('/api', api.routes())
 

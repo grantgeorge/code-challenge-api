@@ -1,5 +1,6 @@
 const path = require('path')
 const _ = require('lodash')
+const strength = require('strength')
 
 const ROOT = path.resolve(__dirname, '../')
 const NODE_ENV = _.defaultTo(process.env.NODE_ENV, 'development')
@@ -35,14 +36,51 @@ module.exports = {
     enableTypes: ['json', 'html'],
   },
 
-  db: {},
-
   secret: _.defaultTo(process.env.SECRET, 'secret'),
 
   jwtSecret: _.defaultTo(process.env.JWT_SECRET, 'secret'),
 
   jwtOptions: {
     expiresIn: '7d',
+  },
+
+  // mongoose
+  mongoose: {
+    debug: process.env.MONGOOSE_DEBUG,
+    Promise: global.Promise,
+    mongo: {
+      url: process.env.DATABASE_URL,
+    },
+  },
+
+  // authentication
+  auth: {
+    local: process.env.AUTH_LOCAL_ENABLED,
+    providers: {
+      facebook: process.env.AUTH_FACEBOOK_ENABLED,
+    },
+    strategies: {
+      local: {
+        usernameField: 'email',
+        passwordField: 'password',
+        session: false,
+        usernameLowerCase: true,
+        limitAttempts: true,
+        maxAttempts:
+          process.env.NODE_ENV === 'development' ? Number.MAX_VALUE : 5,
+        digestAlgorithm: 'sha256',
+        encoding: 'hex',
+        saltlen: 32,
+        iterations: 25000,
+        keylen: 512,
+        passwordValidator: (password, cb) => {
+          console.log('password validator!')
+          if (process.env.NODE_ENV === 'development') return cb()
+          const howStrong = strength(password)
+          cb(howStrong < 3 ? new Error('Password not strong enough') : null)
+        },
+      },
+    },
   },
 }
 

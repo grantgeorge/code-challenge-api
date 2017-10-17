@@ -1,11 +1,8 @@
 const mongoose = require('mongoose')
-const humps = require('humps')
-const _ = require('lodash')
-const bcrypt = require('bcrypt')
 const { ValidationError } = require('lib/errors')
 const { generateJWTforUser } = require('lib/utils')
 const User = mongoose.model('User')
-const passport = require('passport')
+const passport = require('config/passport')
 
 const get = async(ctx) => {
   const user = ctx.state.user
@@ -14,21 +11,26 @@ const get = async(ctx) => {
 }
 
 const post = async(ctx) => {
-  const { body } = ctx.request
+  try {
+    const { body } = ctx.request
 
-  console.log(body)
+    console.log('body: ', body.user)
 
-  const user = new User()
+    const user = new User()
 
-  console.log('new user: ', user)
+    user.userame = body.user.username
+    user.email = body.user.email
+    user.setPassword(body.user.password)
 
-  user.username = body.user.username
-  user.email = body.user.email
-  user.setPassword(body.user.password)
+    console.log(user)
 
-  await user.save()
+    await user.save()
 
-  ctx.body = { user: user.toAuthJSON() }
+    ctx.body = { user: user.toAuthJSON() }
+  } catch (err) {
+    console.log(err)
+    ctx.status = 500
+  }
 }
 
 const put = async(ctx) => {
@@ -62,36 +64,33 @@ const put = async(ctx) => {
   }
 }
 
-// TODO: fuck
 const login = async(ctx) => {
-  const { body } = ctx.request
+  try {
+    await passport.authenticate('local', { session: false }, async function(
+      err,
+      user,
+      info
+    ) {
+      if (err) {
+        ctx.throw(err)
+      }
 
-  if (!_.isObject(body.user) || !body.user.email || !body.user.password) {
-    ctx.throw(422, new ValidationError(['is invalid'], '', 'email or password'))
+      if (user) {
+        user.token = await user.generateJWT()
+        ctx.body = {
+          user: user.toAuthJSON(),
+        }
+      } else {
+        ctx.body = {
+          error: new ValidationError(['is invalid'], '', 'email or password'),
+        }
+        ctx.status = 422
+      }
+    })(ctx)
+  } catch (err) {
+    console.error(err)
+    ctx.status = 500
   }
-
-  await passport.authenticate(
-    'local',
-    { session: false },
-    (err, user, info) => {
-      return new Promise(async(resolve, reject) => {
-        if (err) {
-          reject(err)
-        }
-
-        if (user) {
-          user.token = user.generateJWT()
-          ctx.body = user.toAuthJSON()
-        } else {
-          ctx.throw(
-            422,
-            new ValidationError(['is invalid'], '', 'email or password')
-          )
-        }
-        return resolve()
-      })
-    }
-  )
 }
 
 module.exports = {

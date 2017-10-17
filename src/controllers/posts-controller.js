@@ -1,11 +1,8 @@
 const mongoose = require('mongoose')
-const slug = require('slug')
-const humps = require('humps')
-const _ = require('lodash')
 const Post = mongoose.model('Post')
 const User = mongoose.model('User')
+const Comment = mongoose.model('Comment')
 // const comments = require('./comments-controller')
-const { ValidationError } = require('lib/errors')
 const { merge } = require('lodash')
 
 const byId = async(id, ctx, next) => {
@@ -20,6 +17,22 @@ const byId = async(id, ctx, next) => {
   }
 
   ctx.state.post = post
+
+  await next()
+}
+
+const byComment = async(comment, ctx, next) => {
+  if (!comment) {
+    ctx.throw(404)
+  }
+
+  const thisComment = await Comment.findById(comment)
+
+  if (!thisComment) {
+    ctx.throw(404)
+  }
+
+  ctx.state.comment = thisComment
 
   await next()
 }
@@ -102,11 +115,11 @@ const getFeed = async(ctx) => {
       Post.count({ author: { $in: user.following } }),
     ])
 
-    const [articles, articlesCount] = results
+    const [posts, postsCount] = results
 
     ctx.body = {
-      articles: articles.map((article) => article.toJSONFor(user)),
-      articlesCount,
+      posts: posts.map((post) => post.toJSONFor(user)),
+      postsCount,
     }
   } catch (err) {
     console.log(err)
@@ -160,14 +173,127 @@ const del = async(ctx) => {
   }
 }
 
+const favoriteCreate = async(ctx) => {
+  try {
+    const { post, user } = ctx.state
+    const postId = post._id
+
+    await user.favorite(postId)
+
+    let updated = await post.updateFavoriteCount()
+
+    ctx.body = {
+      post: updated.toJSONFor(user),
+    }
+  } catch (err) {
+    console.error(err)
+    ctx.throw(500)
+  }
+}
+
+const favoriteDel = async(ctx) => {
+  try {
+    const { post, user } = ctx.state
+    const postId = post._id
+
+    await user.unfavorite(postId)
+
+    let updated = await post.updateFavoriteCount()
+
+    ctx.body = {
+      post: updated.toJSONFor(user),
+    }
+  } catch (err) {
+    console.error(err)
+    ctx.throw(500)
+  }
+}
+
+const commentsGet = async(ctx) => {
+  try {
+    const { post, user } = ctx.state
+    await post
+      .populate({
+        path: 'comments',
+        populate: {
+          path: 'author',
+        },
+        options: {
+          sort: {
+            createdAt: 'desc',
+          },
+        },
+      })
+      .execPopulate()
+    ctx.body = {
+      comments: post.comments.map((comment) => comment.toJSONFor(user)),
+    }
+  } catch (err) {
+    console.error(err)
+    ctx.throw(500)
+  }
+}
+
+const commentsCreate = async(ctx) => {
+  try {
+    const { post, user } = ctx.state
+    const { body } = ctx.request
+
+    console.log('body: ', body)
+
+    const comment = await Comment.create(
+      merge({ author: user, post }, body.comment)
+    )
+
+    post.comments.push(comment)
+
+    await post.save()
+
+    ctx.body = {
+      comment: comment.toJSONFor(user),
+    }
+  } catch (err) {
+    console.error(err)
+    ctx.throw(500)
+  }
+}
+
+const commentsDel = async(ctx) => {
+  try {
+    const { post, comment, user } = ctx.state
+    if (comment.author.toString() === user.id.toString()) {
+      post.comments.remove(comment._id)
+      await post.save()
+      await comment.remove()
+      ctx.status = 204
+    } else {
+      ctx.throw(403)
+    }
+  } catch (err) {
+    console.error(err)
+    ctx.throw(500)
+  }
+}
+
 module.exports = {
+  byId,
+  byComment,
+
   index,
   create,
   feed: {
     get: getFeed,
   },
-  byId,
   show,
   update,
   del,
+  favorite: {
+    create: favoriteCreate,
+    del: favoriteDel,
+  },
+  comments: {
+    get: commentsGet,
+    create: commentsCreate,
+    del: commentsDel,
+  },
 }

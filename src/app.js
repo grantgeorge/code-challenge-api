@@ -17,6 +17,7 @@ const jwt = require('middleware/jwt-middleware')
 const etag = require('koa-etag')
 const helmet = require('koa-helmet')
 const Timeout = require('koa-better-timeout')
+const passport = require('config/passport')
 
 const mongoose = require('mongoose')
 
@@ -73,7 +74,7 @@ app.context.onerror = errorHandler
 app.use(async(ctx, next) => {
   try {
     const timeout = new Timeout({
-      ms: 3000,
+      ms: 30000,
       message: 'REQUEST_TIMED_OUT',
     })
     await timeout.middleware(ctx, next)
@@ -82,22 +83,32 @@ app.use(async(ctx, next) => {
   }
 })
 
+// auth
+// app.use(passport.initialize())
+
 if (config.env.isProd) {
   mongoose.connect(process.env.MONGODB_URI, {
     useMongoClient: true,
+    promiseLibrary: global.Promise,
+  })
+} else if (config.env.isTest) {
+  mongoose.connect('mongodb://localhost/sts-code-challenge-test', {
+    useMongoClient: true,
+    promiseLibrary: global.Promise,
   })
 } else {
-  mongoose.connect('mongodb://localhost/sts-code-challenge', {
+  mongoose.connect('mongodb://localhost/sts-code-challenge-dev', {
     useMongoClient: true,
+    promiseLibrary: global.Promise,
   })
   mongoose.set('debug', true)
 }
 
 require('./models/User')
-require('./models/Article')
 require('./models/Comment')
 require('./models/Post')
-require('./config/passport')
+
+require('config/passport')
 
 // User Middleware
 app.use(require('middleware/user-middleware'))
