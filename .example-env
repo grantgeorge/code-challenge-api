@@ -1,13 +1,12 @@
-NODE_ENV = development
-PORT = 1337
-SECRET = secret
-JWT_SECRET = secret
+NODE_ENV=development
+PORT=1337
+SECRET=secret
+JWT_SECRET=secret
+NODE_PATH=src
 
 AUTH_LOCAL_ENABLED=true
 AUTH_FACEBOOK_ENABLED=false
 
+# Databse
+MONGODB_URI=mongodb://localhost/sts-code-challenge
 MONGOOSE_DEBUG=true
-DATABASE_URL=mongodb://localhost/sts-code-challenge
-
-#DB_CLIENT = sqlite3 | pg
-#DB_CONNECTION = postgres://user:password@localhost:5432/db_name

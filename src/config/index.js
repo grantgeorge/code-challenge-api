@@ -49,7 +49,7 @@ module.exports = {
     debug: process.env.MONGOOSE_DEBUG,
     Promise: global.Promise,
     mongo: {
-      url: process.env.DATABASE_URL,
+      url: process.env.MONGODB_URI,
     },
   },
 

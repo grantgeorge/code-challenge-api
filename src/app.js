@@ -93,7 +93,7 @@ if (config.env.isProd) {
 } else if (config.env.isTest) {
   // Use test DB connection. See test/helpers/index.js
 } else {
-  mongoose.connect('mongodb://localhost/sts-code-challenge-dev', {
+  mongoose.connect(process.env.MONGODB_URI, {
     useMongoClient: true,
     promiseLibrary: global.Promise,
   })
