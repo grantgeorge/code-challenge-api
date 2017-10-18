@@ -8,7 +8,7 @@ const bodyParser = require('koa-bodyparser')
 const koa404Handler = require('koa-404-handler')
 const json = require('koa-json')
 const errorHandler = require('koa-better-error-handler')
-const compress = require('koa-compress')
+// const compress = require('koa-compress')
 const responseTime = require('koa-response-time')
 const removeTrailingSlashes = require('koa-no-trailing-slash')
 const conditional = require('koa-conditional-get')
@@ -64,7 +64,7 @@ app.use(bodyParser(config.bodyParser))
 app.use(json())
 
 // compress/gzip
-app.use(compress())
+// app.use(compress())
 
 // override koa's undocumented error handler
 app.context.onerror = errorHandler

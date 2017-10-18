@@ -50,6 +50,8 @@ const index = async(ctx) => {
     let thisAuthor = queries[0]
     let favoriter = queries[1]
 
+    console.log(queries)
+
     if (thisAuthor) {
       query.author = author._id
     }
