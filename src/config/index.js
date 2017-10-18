@@ -74,7 +74,6 @@ module.exports = {
         iterations: 25000,
         keylen: 512,
         passwordValidator: (password, cb) => {
-          console.log('password validator!')
           if (process.env.NODE_ENV === 'development') return cb()
           const howStrong = strength(password)
           cb(howStrong < 3 ? new Error('Password not strong enough') : null)

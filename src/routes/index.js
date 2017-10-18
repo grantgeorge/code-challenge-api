@@ -10,6 +10,15 @@ api.use(users)
 api.use(posts)
 api.use(profiles)
 
+/**
+* Status check
+*/
+router.get('/api/status', async(ctx) => {
+  ctx.body = {
+    status: 'OK',
+  }
+})
+
 router.use('/api', api.routes())
 
 module.exports = router

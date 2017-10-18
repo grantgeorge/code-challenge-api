@@ -1,15 +1,21 @@
 const mongoose = require('mongoose')
-// const uniqueValidator = require('mongoose-unique-validator')
+mongoose.Promise = global.Promise
 const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
 const secret = require('../config').secret
-// const passportLocalMongoose = require('passport-local-mongoose')
-// const config = require('config')
 
 const UserSchema = new mongoose.Schema(
   {
     hash: String,
     salt: String,
+    username: {
+      type: String,
+      lowercase: true,
+      unique: true,
+      required: [true, "can't be blank"],
+      match: [/^[a-zA-Z0-9]+$/, 'is invalid'],
+      index: true,
+    },
     email: {
       type: String,
       lowercase: true,
@@ -25,9 +31,6 @@ const UserSchema = new mongoose.Schema(
   },
   { timestamps: true }
 )
-
-// UserSchema.plugin(uniqueValidator, { message: 'is already taken.' })
-// UserSchema.plugin(passportLocalMongoose, config.auth.strategies.local)
 
 UserSchema.methods.validPassword = function(password) {
   var hash = crypto
@@ -70,6 +73,7 @@ UserSchema.methods.toAuthJSON = function() {
 
 UserSchema.methods.toProfileJSONFor = function(user) {
   return {
+    email: this.email,
     username: this.username,
     bio: this.bio,
     image:
@@ -126,6 +130,6 @@ UserSchema.statics.registerAsync = function(data, password) {
   })
 }
 
-UserSchema.statics.findByEmail = UserSchema.statics.findByUsername
+// UserSchema.statics.findByEmail = UserSchema.statics.findByUsername
 
 module.exports = mongoose.model('User', UserSchema)

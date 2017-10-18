@@ -42,8 +42,6 @@ const index = async(ctx) => {
     const { offset, limit, author, favorited } = ctx.query
     const query = {}
 
-    // console.log('user on req: ', user)
-
     let queries = await Promise.all([
       author ? User.findOne({ username: author }) : null,
       favorited ? User.findOne({ username: favorited }) : null,
@@ -238,8 +236,6 @@ const commentsCreate = async(ctx) => {
   try {
     const { post, user } = ctx.state
     const { body } = ctx.request
-
-    console.log('body: ', body)
 
     const comment = await Comment.create(
       merge({ author: user, post }, body.comment)

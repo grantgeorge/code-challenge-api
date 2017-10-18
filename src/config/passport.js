@@ -8,6 +8,7 @@ passport.use(
     {
       usernameField: 'user[email]',
       passwordField: 'user[password]',
+      session: false,
     },
     async(email, password, done) => {
       try {

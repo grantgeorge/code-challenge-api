@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+mongoose.Promise = global.Promise
 
 const CommentSchema = new mongoose.Schema(
   {
@@ -19,4 +20,4 @@ CommentSchema.methods.toJSONFor = function(user) {
   }
 }
 
-mongoose.model('Comment', CommentSchema)
+module.exports = mongoose.model('Comment', CommentSchema)

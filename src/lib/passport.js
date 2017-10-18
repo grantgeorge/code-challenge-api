@@ -1,5 +1,0 @@
-const mongoose = require('mongoose')
-const passport = require('koa-passport')
-const _ = require('lodash')
-const config = require('config')
-const User = require('models/User')

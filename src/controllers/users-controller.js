@@ -1,6 +1,5 @@
 const mongoose = require('mongoose')
 const { ValidationError } = require('lib/errors')
-const { generateJWTforUser } = require('lib/utils')
 const User = mongoose.model('User')
 const passport = require('config/passport')
 
@@ -14,15 +13,11 @@ const post = async(ctx) => {
   try {
     const { body } = ctx.request
 
-    console.log('body: ', body.user)
-
     const user = new User()
 
-    user.userame = body.user.username
+    user.username = body.user.username
     user.email = body.user.email
     user.setPassword(body.user.password)
-
-    console.log(user)
 
     await user.save()
 
@@ -69,7 +64,8 @@ const login = async(ctx) => {
     await passport.authenticate('local', { session: false }, async function(
       err,
       user,
-      info
+      info,
+      status
     ) {
       if (err) {
         ctx.throw(err)

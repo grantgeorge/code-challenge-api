@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const chalk = require('chalk')
 require('dotenv').config()
 const { server: { port, host } } = require('../config')
@@ -5,7 +6,20 @@ const { server: { port, host } } = require('../config')
 const app = require('../app')
 
 process.once('SIGINT', () => app.shutDown())
+process.once('SIGHUP', () => app.shutDown())
 process.once('SIGTERM', () => app.shutDown())
+
+// handle uncaught promises
+process.on('unhandledRejection', function(reason, p) {
+  console.log(`unhandled promise rejection: ${reason}`, p)
+  console.dir(p, { depth: null })
+})
+
+// handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.log(err)
+  process.exit(1)
+})
 
 app.server.listen(port, host)
 
@@ -17,7 +31,7 @@ function onError(error) {
     throw error
   }
 
-  var bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port
+  const bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port
 
   switch (error.code) {
     case 'EACCES':
@@ -32,7 +46,7 @@ function onError(error) {
 }
 
 function onListening() {
-  var addr = app.server.address()
-  var bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port
+  const addr = app.server.address()
+  const bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port
   console.log(chalk.greenBright('[API] 🚀 Listening on ' + bind))
 }

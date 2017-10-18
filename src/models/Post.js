@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const uniqueValidator = require('mongoose-unique-validator')
+mongoose.Promise = global.Promise
 const User = mongoose.model('User')
 
 const PostSchema = new mongoose.Schema(
@@ -11,8 +11,6 @@ const PostSchema = new mongoose.Schema(
   },
   { timestamps: true }
 )
-
-PostSchema.plugin(uniqueValidator, { message: 'is already taken' })
 
 PostSchema.methods.updateFavoriteCount = function() {
   const post = this
@@ -36,4 +34,4 @@ PostSchema.methods.toJSONFor = function(user) {
   }
 }
 
-mongoose.model('Post', PostSchema)
+module.exports = mongoose.model('Post', PostSchema)

@@ -1,9 +1,11 @@
-const mongoose = require('mongoose')
-mongoose.Promise = global.Promise
 const test = require('ava')
+const User = require('models/User')
+const faker = require('faker')
 
-const app = require('../../app')
-const User = mongoose.model('User')
+const { before, after } = require('../helpers')
+
+test.before(before)
+test.after.always(after)
 
 let user
 
@@ -11,9 +13,9 @@ const genUser = async() => {
   return new Promise((resolve, reject) => {
     user = new User({
       provider: 'local',
-      name: 'Fake user',
-      email: 'test@example.com',
-      password: 'password',
+      email: faker.internet.email(),
+      password: faker.internet.password(),
+      username: faker.name.firstName(),
     })
     return resolve(user)
   })
@@ -24,36 +26,43 @@ test.before(async(t) => {
 })
 
 test.beforeEach(async(t) => {
-  genUser()
+  await genUser()
 })
 
-test.afterEach(async(t) => {
+test.afterEach.always(async(t) => {
   await User.remove()
 })
 
-test.after(async(t) => {
-  app.server.on('close', () => {})
-  mongoose.connection.db.dropDatabase()
-  app.server.close()
-})
-
-test(`It should begin with no users`, async(t) => {
+test.serial(`It should begin with no users`, async(t) => {
   let users = await User.find()
   t.is(users.length, 0)
 })
 
-test(`It should fail when saving a duplicate user`, async(t) => {
-  const user1 = await genUser()
-  await user1.save()
-  const user2 = await genUser()
-  await user2.save()
+test.serial(
+  `It should fail when saving a duplicate email for user`,
+  async(t) => {
+    await user.save()
+    let anotherUser = await new User({
+      provider: 'local',
+      email: user.email,
+      password: user.password,
+      username: faker.name.firstName(),
+    })
 
-  const users = await User.find()
+    const error = await t.throws(anotherUser.save())
 
-  t.is(users.length, 1)
+    t.is(
+      error.message,
+      `E11000 duplicate key error dup key: { : "${user.email}" }`
+    )
+    const users = await User.find()
+
+    t.is(users.length, 1)
+  }
+)
+
+test.serial(`[email] should fail when saving with a blank email`, async(t) => {
+  user.email = ''
+  const error = await t.throws(user.save())
+  t.is(error.message, "User validation failed: email: can't be blank")
 })
-
-// test(`[email] should fail when saving with a blank email`, async(t) => {
-//   user.email = ''
-//   t.throws(() => user.save().exec())
-// })

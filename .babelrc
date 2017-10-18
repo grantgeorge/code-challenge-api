@@ -1,12 +1,7 @@
 {
-  "presets": [
-    [
-      "env",
-      {
-        "targets": {
-          "node": "current"
-        }
-      }
-    ]
+  "presets": [["env", { "useBuiltIns": true }]],
+  "plugins": [
+    "lodash",
+    ["transform-object-rest-spread", { "useBuiltIns": false }]
   ]
 }

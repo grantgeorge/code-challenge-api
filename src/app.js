@@ -17,6 +17,7 @@ const jwt = require('middleware/jwt-middleware')
 const etag = require('koa-etag')
 const helmet = require('koa-helmet')
 const Timeout = require('koa-better-timeout')
+const chalk = require('chalk')
 const passport = require('config/passport')
 
 const mongoose = require('mongoose')
@@ -31,9 +32,10 @@ app.keys = [config.secret]
 if (!config.env.isTest) {
   app.use(responseTime())
   app.use(helmet())
+  app.use(logger())
+  // cors
+  app.use(cors(config.cors))
 }
-
-app.use(logger())
 
 // Camelize keys
 app.use(camelizeMiddleware)
@@ -46,9 +48,6 @@ app.use(conditional())
 
 // etag
 app.use(etag())
-
-// cors
-app.use(cors(config.cors))
 
 app.use(render)
 
@@ -84,7 +83,7 @@ app.use(async(ctx, next) => {
 })
 
 // auth
-// app.use(passport.initialize())
+app.use(passport.initialize())
 
 if (config.env.isProd) {
   mongoose.connect(process.env.MONGODB_URI, {
@@ -92,10 +91,7 @@ if (config.env.isProd) {
     promiseLibrary: global.Promise,
   })
 } else if (config.env.isTest) {
-  mongoose.connect('mongodb://localhost/sts-code-challenge-test', {
-    useMongoClient: true,
-    promiseLibrary: global.Promise,
-  })
+  // Use test DB connection. See test/helpers/index.js
 } else {
   mongoose.connect('mongodb://localhost/sts-code-challenge-dev', {
     useMongoClient: true,
@@ -123,26 +119,23 @@ app.server = require('http-shutdown')(http.createServer(app.callback()))
 // 404 handler
 app.use(koa404Handler)
 
-app.shutDown = function shutDown() {
-  let err
+app.shutDown = async function shutDown() {
+  let server = this.server
 
-  console.log('Shutdown')
+  if (!server || !server.close) return process.exit(0)
 
-  if (this.server.listening) {
-    this.server.shutdown((error) => {
-      if (error) {
-        console.error(error)
-        err = error
-      }
+  if (server.listening) {
+    try {
+      await server.close()
+      await mongoose.disconnect()
 
-      // this.db
-      //   .destroy()
-      //   .catch((error) => {
-      //     console.error(error)
-      //     err = error
-      //   })
-      //   .then(() => process.exit(err ? 1 : 0))
-    })
+      console.log(chalk.greenBright('[API] 🚫 exiting... bye bye.'))
+
+      process.exit(0)
+    } catch (err) {
+      console.error(chalk.redBright('error shutting down'))
+      process.exit(1)
+    }
   }
 }
 
