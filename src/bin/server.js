@@ -21,7 +21,7 @@ process.on('uncaughtException', (err) => {
   process.exit(1)
 })
 
-app.server.listen(port, host)
+app.server.listen(port)
 
 app.server.on('error', onError)
 app.server.on('listening', onListening)
