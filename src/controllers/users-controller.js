@@ -23,8 +23,7 @@ const post = async(ctx) => {
 
     ctx.body = { user: user.toAuthJSON() }
   } catch (err) {
-    console.log(err)
-    ctx.status = 500
+    throw err
   }
 }
 
@@ -54,8 +53,7 @@ const put = async(ctx) => {
 
     ctx.body = { user: user.toAuthJSON() }
   } catch (err) {
-    console.log(err)
-    ctx.status = 500
+    throw err
   }
 }
 

@@ -10,9 +10,15 @@ api.use(users)
 api.use(posts)
 api.use(profiles)
 
-/**
-* Status check
-*/
+/*
+ * @api [get] /status
+ * tags: [status]
+ * summary: "Check API Status"
+ * description: "Litmus test for API availability. Returns a 200 OK with a small JSON status payload."
+ * responses:
+ *   200:
+ *     description: "successful operation"
+ */
 router.get('/api/status', async(ctx) => {
   ctx.body = {
     status: 'OK',

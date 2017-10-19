@@ -61,14 +61,15 @@
     "nodemon": "^1.12.1",
     "nyc": "^11.2.1",
     "should": "^13.1.2",
-    "supertest": "^3.0.0"
+    "supertest": "^3.0.0",
+    "swagger-inline": "0.0.8"
   },
   "scripts": {
     "start": "cross-env NODE_PATH=src nodemon src/bin/server.js",
-    "test":
-      "cross-env NODE_PATH=src NODE_ENV=test ava --verbose src/test/**/*.js",
+    "test": "cross-env NODE_PATH=src NODE_ENV=test ava --verbose src/test/**/*.js",
     "debug": "cross-env DEBUG=* NODE_PATH=src nodemon src/bin/server.js",
-    "lint": "cross-env eslint ./src/**/*.js"
+    "lint": "cross-env eslint ./src/**/*.js",
+    "swagger": "swagger-inline './src/routes/**/*.js' --base './swaggerBase.yaml' --out swagger-api.yaml"
   },
   "engines": {
     "node": ">=8.3"

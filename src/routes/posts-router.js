@@ -7,6 +7,15 @@ const auth = require('middleware/auth-required-middleware')
 router.param('id', ctrl.byId)
 router.param('comment', ctrl.byComment)
 
+/*
+ * @api [get] /posts
+ * tags: [post]
+ * summary: "Get a collection of Posts."
+ * description: "Can provide offset, limit, etc."
+ * responses:
+ *   200:
+ *     description: "successful operation"
+ */
 router.get('/posts', ctrl.index)
 router.post('/posts', auth, ctrl.create)
 

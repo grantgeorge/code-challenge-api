@@ -1,0 +1,70 @@
+swagger: '2.0'
+host: sts-code-challenge.herokuapp.com
+basePath: /api
+schemes:
+  - http
+info:
+  version: 1.0.0
+  title: STS Code Challenge
+  description: API for STS Code Challenge
+tags:
+  - name: status
+  - name: user
+  - name: post
+  - name: profile
+paths:
+  /status:
+    get:
+      tags:
+        - status
+      summary: Check API Status
+      description: >-
+        Litmus test for API availability. Returns a 200 OK with a small JSON
+        status payload.
+      responses:
+        '200':
+          description: successful operation
+  /posts:
+    get:
+      tags:
+        - post
+      summary: Get a collection of Posts.
+      description: 'Can provide offset, limit, etc.'
+      responses:
+        '200':
+          description: successful operation
+  /users/login:
+    post:
+      tags:
+        - user
+      summary: Login
+      description: Login to app and return generated JWT.
+      responses:
+        '200':
+          description: successful operation
+  /users:
+    post:
+      tags:
+        - user
+      summary: Create new user
+      description: Creates a new user and returns JWT.
+      responses:
+        '200':
+          description: successful operation
+  /user:
+    get:
+      tags:
+        - user
+      summary: Get current user
+      description: Must provide valid Authorization Token and returns JWT.
+      responses:
+        '200':
+          description: successful operation
+    put:
+      tags:
+        - user
+      summary: Update current user
+      description: Must provide valid Authorization Token and returns JWT.
+      responses:
+        '200':
+          description: successful operation

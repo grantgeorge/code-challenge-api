@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-mongoose.Promise = global.Promise
+const uniqueValidator = require('mongoose-unique-validator')
 const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
 const secret = require('../config').secret
@@ -47,17 +47,20 @@ UserSchema.methods.setPassword = function(password) {
 }
 
 UserSchema.methods.generateJWT = function() {
-  const today = new Date()
-  const exp = new Date(today)
-  exp.setDate(today.getDate() + 60)
+  // token = jwt.sign({ _id: user._id }, config.secrets.session, {
+  //     expiresIn: '60 days',
+  //   })
 
   return jwt.sign(
     {
       id: this._id,
       username: this.username,
-      exp: '1d',
+      email: this.email,
     },
-    secret
+    secret,
+    {
+      expiresIn: '60 days',
+    }
   )
 }
 
@@ -67,7 +70,8 @@ UserSchema.methods.toAuthJSON = function() {
     email: this.email,
     token: this.generateJWT(),
     bio: this.bio,
-    image: this.image,
+    image:
+      this.image || 'https://static.productionready.io/images/smiley-cyrus.jpg',
   }
 }
 
@@ -129,6 +133,8 @@ UserSchema.statics.registerAsync = function(data, password) {
     })
   })
 }
+
+UserSchema.plugin(uniqueValidator)
 
 // UserSchema.statics.findByEmail = UserSchema.statics.findByUsername
 

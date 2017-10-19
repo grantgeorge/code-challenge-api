@@ -1,0 +1,13 @@
+swagger: "2.0"
+host: "sts-code-challenge.herokuapp.com"
+basePath: "/api"
+schemes: ['http']
+info:
+  version: 1.0.0
+  title: STS Code Challenge
+  description: API for STS Code Challenge
+tags:
+  - name: status
+  - name: user
+  - name: post
+  - name: profile
