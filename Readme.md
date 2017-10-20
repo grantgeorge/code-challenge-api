@@ -103,9 +103,9 @@ yarn test
 
 ##
 
-[example]: https://sts-code-challenge.herokuapp.com/api/status
+[example]: https://sts-code-challenge.herokuapp.com
 
-[source]: https://github.com/settheset/code-challenge
+[source]: https://github.com/settheset/code-challenge-api
 
 [npm]: https://www.npmjs.com/
 
