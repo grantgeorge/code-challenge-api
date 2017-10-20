@@ -6,12 +6,103 @@ schemes:
 info:
   version: 1.0.0
   title: STS Code Challenge
-  description: API for STS Code Challenge
+  description: >-
+    API for STS Code Challenge. End-point for creating users, creating posts,
+    commenting on posts, following users, and favoriting posts.
 tags:
   - name: status
   - name: user
+  - name: follow
   - name: post
+  - name: favorite
   - name: profile
+definitions:
+  AuthedUser:
+    type: object
+    properties:
+      user:
+        type: object
+        properties:
+          username:
+            type: string
+          email:
+            type: string
+          token:
+            type: string
+          image:
+            type: string
+  LoginUser:
+    type: object
+    properties:
+      user:
+        type: object
+        properties:
+          email:
+            type: string
+          password:
+            type: string
+  User:
+    type: object
+    properties:
+      user:
+        type: object
+        properties:
+          email:
+            type: string
+          password:
+            type: string
+          username:
+            type: string
+  Profile:
+    type: object
+    properties:
+      profile:
+        type: object
+        properties:
+          email:
+            type: string
+          username:
+            type: string
+          image:
+            type: string
+          following:
+            type: boolean
+  Post:
+    type: object
+    properties:
+      post:
+        type: object
+        properties:
+          id:
+            type: string
+          body:
+            type: string
+          createdAt:
+            type: string
+            format: date-time
+          updatedAt:
+            type: string
+            format: date-time
+          favorited:
+            type: boolean
+            default: false
+          favoritesCount:
+            type: integer
+            format: int32
+          author:
+            $ref: '#/definitions/Post'
+  Comment:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      body:
+        type: string
+      post:
+        $ref: '#/definitions/Post'
+      author:
+        $ref: '#/definitions/User'
 paths:
   /status:
     get:
@@ -28,29 +119,353 @@ paths:
     get:
       tags:
         - post
-      summary: Get a collection of Posts.
-      description: 'Can provide offset, limit, etc.'
+      summary: Get a collection of all posts
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: limit
+          in: query
+          description: limit amount of response
+          required: false
+          type: string
+        - name: offset
+          in: query
+          description: Offset of returned results
+          required: false
+          type: string
+        - name: author
+          in: query
+          description: Limit to posts by author name
+          required: false
+          type: string
       responses:
         '200':
           description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Post'
+    post:
+      tags:
+        - post
+      summary: Create a new post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: Post data to update with
+          required: true
+          schema:
+            type: object
+            properties:
+              body:
+                type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Post'
+  /posts/feed:
+    get:
+      tags:
+        - post
+      summary: Get a the post feed (your posts and posts of followers)
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: limit
+          in: query
+          description: limit amount of response
+          required: false
+          type: string
+        - name: offset
+          in: query
+          description: Offset of returned results
+          required: false
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Post'
+  '/posts/{postId}':
+    get:
+      tags:
+        - post
+      summary: Find post by ID
+      description: Returns a single post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: postId
+          in: path
+          description: ID of the post to return
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Post'
+    put:
+      tags:
+        - post
+      summary: Updates a post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: postId
+          in: path
+          description: ID of the post to modify
+          required: true
+          type: string
+        - name: body
+          in: body
+          description: Post data to update with
+          required: true
+          schema:
+            type: object
+            properties:
+              body:
+                type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Post'
+    delete:
+      tags:
+        - post
+      summary: Delete a post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: postId
+          in: path
+          description: ID of the post to delete
+          required: true
+          type: string
+      responses:
+        '204':
+          description: successful operation
+  '/posts/{postId}/favorite':
+    post:
+      tags:
+        - favorite
+      summary: Favorite a post
+      description: Returns the updated post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: postId
+          in: path
+          description: ID of the post to favorite
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Post'
+    delete:
+      tags:
+        - favorite
+      summary: Unfavorite a post
+      description: Returns the updated post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: postId
+          in: path
+          description: ID of the post to unfavorite
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Post'
+  '/posts/{postId}/comments':
+    get:
+      tags:
+        - comment
+      summary: Get comments for post
+      description: Returns array of comments
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: postId
+          in: path
+          description: ID of the post to fetch comments for
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Comment'
+    post:
+      tags:
+        - comment
+      summary: Create a new comment for post
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: postId
+          in: path
+          description: ID of the post to create a comment for
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Comment'
+  '/posts/{postId}/comments/{commentId}':
+    delete:
+      tags:
+        - comment
+      summary: Delete a comment
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: postId
+          in: path
+          description: ID of the post that contains comment to delete
+          required: true
+          type: string
+        - name: commentId
+          in: path
+          description: ID of the comment to delete
+          required: true
+          type: string
+      responses:
+        '204':
+          description: successful operation
+  '/profiles/{username}':
+    get:
+      tags:
+        - profile
+      summary: Get a users profile
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: username
+          in: path
+          description: Username of the user to return
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Profile'
+  '/profiles/{username}/follow':
+    post:
+      tags:
+        - follow
+      summary: Follow a user
+      description: Returns a simple object for the associated user.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: username
+          in: path
+          description: Username of the user to follow
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Profile'
+    delete:
+      tags:
+        - follow
+      summary: Unfollow a user
+      description: Returns a simple object for the associated user.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: username
+          in: path
+          description: Username of the user to unfollow
+          required: true
+          type: string
+      responses:
+        '200':
+          description: successful operation
+          schema:
+            $ref: '#/definitions/Profile'
   /users/login:
     post:
       tags:
         - user
       summary: Login
-      description: Login to app and return generated JWT.
+      description: Login to app and return generated JWT. Accepts email/password.
+      parameters:
+        - name: body
+          in: body
+          description: User to create
+          required: true
+          schema:
+            $ref: '#/definitions/LoginUser'
       responses:
         '200':
           description: successful operation
+          schema:
+            $ref: '#/definitions/AuthedUser'
   /users:
     post:
       tags:
         - user
       summary: Create new user
       description: Creates a new user and returns JWT.
+      parameters:
+        - name: body
+          in: body
+          description: User to create
+          required: true
+          schema:
+            $ref: '#/definitions/User'
       responses:
         '200':
           description: successful operation
+          schema:
+            $ref: '#/definitions/AuthedUser'
   /user:
     get:
       tags:
@@ -60,6 +475,8 @@ paths:
       responses:
         '200':
           description: successful operation
+          schema:
+            $ref: '#/definitions/AuthedUser'
     put:
       tags:
         - user
@@ -68,3 +485,5 @@ paths:
       responses:
         '200':
           description: successful operation
+          schema:
+            $ref: '#/definitions/AuthedUser'

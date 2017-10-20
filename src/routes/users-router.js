@@ -8,10 +8,13 @@ const auth = require('middleware/auth-required-middleware')
  * @api [post] /users/login
  * tags: [user]
  * summary: "Login"
- * description: "Login to app and return generated JWT."
+ * description: "Login to app and return generated JWT. Accepts email/password."
+ * parameters: [{name: body, in: body, description: "User to create", required: true, schema: { $ref: "#/definitions/LoginUser" }}]
  * responses:
  *   200:
  *     description: "successful operation"
+ *     schema:
+ *       $ref: "#/definitions/AuthedUser"
  */
 router.post('/users/login', ctrl.login)
 
@@ -20,9 +23,12 @@ router.post('/users/login', ctrl.login)
  * tags: [user]
  * summary: "Create new user"
  * description: "Creates a new user and returns JWT."
+ * parameters: [{name: body, in: body, description: "User to create", required: true, schema: { $ref: "#/definitions/User" }}]
  * responses:
  *   200:
  *     description: "successful operation"
+ *     schema:
+ *       $ref: "#/definitions/AuthedUser"
  */
 router.post('/users', ctrl.post)
 
@@ -34,6 +40,8 @@ router.post('/users', ctrl.post)
  * responses:
  *   200:
  *     description: "successful operation"
+ *     schema:
+ *       $ref: "#/definitions/AuthedUser"
  */
 router.get('/user', auth, ctrl.get)
 
@@ -45,6 +53,8 @@ router.get('/user', auth, ctrl.get)
  * responses:
  *   200:
  *     description: "successful operation"
+ *     schema:
+ *       $ref: "#/definitions/AuthedUser"
  */
 router.put('/user', auth, ctrl.put)
 

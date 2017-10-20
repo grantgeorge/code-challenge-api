@@ -50,9 +50,6 @@ const index = async(ctx) => {
     let thisAuthor = queries[0]
     let favoriter = queries[1]
 
-    console.log('author: ', thisAuthor)
-    console.log('favoriter: ', favoriter)
-
     if (thisAuthor) {
       query.author = author._id
     }
@@ -62,8 +59,6 @@ const index = async(ctx) => {
     } else if (favorited) {
       query._id = { $in: [] }
     }
-
-    console.log(query)
 
     let results = await Promise.all([
       Post.find(query)
@@ -77,16 +72,11 @@ const index = async(ctx) => {
 
     let [posts, postsCount, currentUser] = results
 
-    console.log('posts: ', posts)
-
-    console.log('ctx.state.user: ', ctx.state.user)
-
     ctx.body = {
       posts: posts.map((post) => post.toJSONFor(currentUser)),
       postsCount: postsCount,
     }
   } catch (err) {
-    console.log(err)
     ctx.throw(err)
   }
 }
@@ -104,7 +94,6 @@ const create = async(ctx) => {
 
     ctx.body = { post: post.toJSONFor(user) }
   } catch (err) {
-    console.log(err)
     ctx.throw(err)
   }
 }

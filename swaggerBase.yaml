@@ -5,9 +5,98 @@ schemes: ['http']
 info:
   version: 1.0.0
   title: STS Code Challenge
-  description: API for STS Code Challenge
+  description: API for STS Code Challenge. End-point for creating users, creating posts, commenting on posts, following users, and favoriting posts.
 tags:
   - name: status
   - name: user
+  - name: follow
   - name: post
+  - name: favorite
   - name: profile
+definitions:
+  AuthedUser:
+    type: object
+    properties:
+      user:
+        type: object
+        properties:
+          username:
+            type: string
+          email:
+            type: string
+          token:
+            type: string
+          image:
+            type: string
+  LoginUser:
+    type: object
+    properties:
+      user:
+        type: object
+        properties:
+          email:
+            type: string
+          password:
+            type: string
+  User:
+    type: object
+    properties:
+      user:
+        type: object
+        properties:
+          email:
+            type: string
+          password:
+            type: string
+          username:
+            type: string
+  Profile:
+    type: object
+    properties:
+      profile:
+        type: object
+        properties:
+          email:
+            type: string
+          username:
+            type: string
+          image:
+            type: string
+          following:
+            type: boolean
+  Post:
+    type: object
+    properties:
+      post:
+        type: object
+        properties:
+          id:
+            type: string
+          body:
+            type: string
+          createdAt:
+            type: string
+            format: date-time
+          updatedAt:
+            type: string
+            format: date-time
+          favorited:
+            type: boolean
+            default: false
+          favoritesCount:
+            type: integer
+            format: int32
+          author:
+            $ref: '#/definitions/Post'
+  Comment:
+    type: object
+    properties:
+      id:
+        type: integer
+        format: int64
+      body:
+        type: string
+      post:
+        $ref: '#/definitions/Post'
+      author:
+        $ref: '#/definitions/User'

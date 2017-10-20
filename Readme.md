@@ -1,6 +1,30 @@
-## Get Started
+## Overview
 
-> We support Mac and Ubuntu-based operating systems (Windows _might_ work).
+> This is the API for the Set The Set Code Challenge.
+
+An example of this API is hosted at:
+
+[example][]
+
+The source code for this repository can be found here:
+
+[source][]
+
+### Documentation
+
+An updated swagger API documentation for this API can be found here:
+
+[swagger][]
+
+### Usage
+
+Use the API as a standard REST API
+
+- accepts standard HTTP get/post/put/delete
+- Accepts JSON as the content type (application/json) for requets and responses
+- cors enabled
+
+## Get Started
 
 ### Requirements
 
@@ -63,7 +87,7 @@ You can also use `NODE_DEBUG` if desired to debug [node][] internal modules.
 
 #### Tests
 
-> We use [mocha][], [should][], and [supertest][] for testing
+> We use [ava][] and [supertest][] for testing
 
 [npm][]:
 
@@ -78,6 +102,10 @@ yarn test
 ```
 
 ##
+
+[example]: https://sts-code-challenge.herokuapp.com/api/status
+
+[source]: https://github.com/settheset/code-challenge
 
 [npm]: https://www.npmjs.com/
 
@@ -97,10 +125,10 @@ yarn test
 
 [brew]: https://brew.sh/
 
-[koa-better-error-handler]: https://github.com/niftylettuce/koa-better-error-handler
-
-[mocha]: https://mochajs.org/
+[ava]: https://github.com/avajs/ava
 
 [should]: https://shouldjs.github.io/
 
 [supertest]: https://github.com/visionmedia/supertest
+
+[swagger]: https://app.swaggerhub.com/apis/Set-The-Set/sts-code-challenge-api/1.0.0
