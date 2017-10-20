@@ -72,7 +72,7 @@
     "lint": "cross-env eslint ./src/**/*.js",
     "swagger":
       "swagger-inline './src/routes/**/*.js' --base './swaggerBase.yaml' --out swagger-api.yaml",
-    "predeploy": "npm run test",
+    "predeploy": "npm run lint && npm run test",
     "deploy": "git push heroku master"
   },
   "engines": {

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const chalk = require('chalk')
 require('dotenv').config()
-const { server: { port, host } } = require('../config')
+const { server: { port } } = require('../config')
 
 const app = require('../app')
 
