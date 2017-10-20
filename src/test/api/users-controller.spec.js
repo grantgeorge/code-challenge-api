@@ -58,7 +58,7 @@ test.serial('login an existing user', async(t) => {
 test.serial('get user profile', async(t) => {
   const { app, currentUser } = t.context
   const res = await request(app)
-    .get('/api/users/me')
+    .get('/api/user')
     .set('Authorization', `Bearer ${currentUser.token}`)
     .set('Accept', 'application/json')
 

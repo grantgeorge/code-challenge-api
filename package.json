@@ -66,10 +66,14 @@
   },
   "scripts": {
     "start": "cross-env NODE_PATH=src nodemon src/bin/server.js",
-    "test": "cross-env NODE_PATH=src NODE_ENV=test ava --verbose src/test/**/*.js",
+    "test":
+      "cross-env NODE_PATH=src NODE_ENV=test ava --verbose src/test/**/*.js",
     "debug": "cross-env DEBUG=* NODE_PATH=src nodemon src/bin/server.js",
     "lint": "cross-env eslint ./src/**/*.js",
-    "swagger": "swagger-inline './src/routes/**/*.js' --base './swaggerBase.yaml' --out swagger-api.yaml"
+    "swagger":
+      "swagger-inline './src/routes/**/*.js' --base './swaggerBase.yaml' --out swagger-api.yaml",
+    "predeploy": "npm run test",
+    "deploy": "git push heroku master"
   },
   "engines": {
     "node": ">=8.3"

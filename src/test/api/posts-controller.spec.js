@@ -66,7 +66,7 @@ test.serial('get post feed', async(t) => {
     .set('Accept', 'application/json')
 
   t.is(res.status, 200)
-  t.is(res.body.posts.length, 0)
+  t.is(res.body.posts.length, 1)
 })
 
 test.serial('get a post', async(t) => {

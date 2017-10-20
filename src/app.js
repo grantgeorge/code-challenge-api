@@ -3,11 +3,8 @@ const http = require('http')
 const render = require('./lib/render')
 const logger = require('koa-logger')
 const camelizeMiddleware = require('middleware/camelize-middleware')
-// const error = require('middleware/error-middleware')
 const bodyParser = require('koa-bodyparser')
-const koa404Handler = require('koa-404-handler')
 const json = require('koa-json')
-const errorHandler = require('koa-better-error-handler')
 // const compress = require('koa-compress')
 const responseTime = require('koa-response-time')
 const removeTrailingSlashes = require('koa-no-trailing-slash')
@@ -40,9 +37,6 @@ if (!config.env.isTest) {
 // Camelize keys
 app.use(camelizeMiddleware)
 
-// Error middleware
-// app.use(error)
-
 // conditional-get
 app.use(conditional())
 
@@ -65,9 +59,6 @@ app.use(json())
 
 // compress/gzip
 // app.use(compress())
-
-// override koa's undocumented error handler
-app.context.onerror = errorHandler
 
 // configure timeout
 app.use(async(ctx, next) => {
@@ -109,6 +100,8 @@ require('config/passport')
 // User Middleware
 app.use(require('middleware/user-middleware'))
 
+app.use(require('middleware/error-middleware'))
+
 const routes = require('routes')
 
 app.use(routes.routes())
@@ -117,7 +110,7 @@ app.use(routes.allowedMethods())
 app.server = require('http-shutdown')(http.createServer(app.callback()))
 
 // 404 handler
-app.use(koa404Handler)
+// app.use(koa404Handler)
 
 app.shutDown = async function shutDown() {
   let server = this.server

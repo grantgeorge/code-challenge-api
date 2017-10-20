@@ -53,7 +53,7 @@ test.serial(
 
     t.is(
       error.message,
-      `E11000 duplicate key error dup key: { : "${user.email}" }`
+      `User validation failed: email: Error, expected \`email\` to be unique. Value: \`${user.email}\``
     )
     const users = await User.find()
 
